@@ -1,0 +1,340 @@
+#include <iostream>
+#include <conio.h>
+#include <stdlib.h>
+#include <string>
+using namespace std;
+
+// Class for the Node of the linked list
+class Node
+{
+public:
+    int uniqueId;
+    string title, author, status;
+    Node *next;
+
+    Node(int id, string t, string a, string s)
+    {
+        uniqueId = id;
+        title = t;
+        author = a;
+        status = s;
+        next = nullptr;
+    }
+};
+
+// Class for the LinkedList
+class LinkedList
+{
+private:
+    Node *head;
+
+public:
+    LinkedList() : head(nullptr) {}
+
+    // Function to append a new book to the list
+    void append(int id, string title, string author, string status)
+    {
+        Node *newNode = new Node(id, title, author, status);
+        if (head == nullptr)
+        {
+            head = newNode;
+        }
+        else
+        {
+            Node *temp = head;
+            while (temp->next != nullptr)
+            {
+                temp = temp->next;
+            }
+            temp->next = newNode;
+        }
+    }
+
+    // Function to display all books in the list
+    void display()
+    {
+        Node *temp = head;
+        while (temp != nullptr)
+        {
+            cout << "ID: " << temp->uniqueId << ", Title: " << temp->title << ", Author: " << temp->author << ", Status: " << temp->status << endl;
+            temp = temp->next;
+        }
+    }
+
+    // Function to search for a book by its ID
+    Node *searchById(int id)
+    {
+        Node *temp = head;
+        while (temp != nullptr)
+        {
+            if (temp->uniqueId == id)
+                return temp;
+            temp = temp->next;
+        }
+        return nullptr;
+    }
+
+    // Function to search for a book by its title
+    Node *searchByTitle(string title)
+    {
+        Node *temp = head;
+        while (temp != nullptr)
+        {
+            if (temp->title == title)
+                return temp;
+            temp = temp->next;
+        }
+        return nullptr;
+    }
+
+    // Function to delete a book by its ID
+    void deleteById(int id)
+    {
+        Node *temp = head;
+        Node *prev = nullptr;
+
+        if (temp != nullptr && temp->uniqueId == id)
+        {
+            head = temp->next;
+            delete temp;
+            cout << "Book with ID " << id << " deleted successfully." << endl;
+            return;
+        }
+
+        while (temp != nullptr && temp->uniqueId != id)
+        {
+            prev = temp;
+            temp = temp->next;
+        }
+
+        if (temp == nullptr)
+        {
+            cout << "Book with ID " << id << " not found." << endl;
+            return;
+        }
+
+        prev->next = temp->next;
+        delete temp;
+        cout << "Book with ID " << id << " deleted successfully." << endl;
+    }
+
+    // Function to issue a book by its ID
+    void issueBook(int id)
+    {
+        Node *book = searchById(id);
+        if (book)
+        {
+            if (book->status == "Available")
+            {
+                book->status = "Issued";
+                cout << "Book with ID " << id << " issued successfully." << endl;
+            }
+            else
+            {
+                cout << "Book with ID " << id << " is already issued." << endl;
+            }
+        }
+        else
+        {
+            cout << "Book with ID " << id << " not found." << endl;
+        }
+    }
+
+    // Function to return a book by its ID
+    void returnBook(int id)
+    {
+        Node *book = searchById(id);
+        if (book)
+        {
+            if (book->status == "Issued")
+            {
+                book->status = "Available";
+                cout << "Book with ID " << id << " returned successfully." << endl;
+            }
+            else
+            {
+                cout << "Book with ID " << id << " is not issued." << endl;
+            }
+        }
+        else
+        {
+            cout << "Book with ID " << id << " not found." << endl;
+        }
+    }
+
+    // Function to sort the list by book ID using bubble sort
+    void sortByBookId()
+    {
+        if (!head || !head->next)
+            return;
+
+        bool swapped;
+        Node *ptr;
+        Node *last = nullptr;
+
+        do
+        {
+            swapped = false;
+            ptr = head;
+
+            while (ptr->next != last)
+            {
+                if (ptr->uniqueId > ptr->next->uniqueId)
+                {
+                    swap(ptr->uniqueId, ptr->next->uniqueId);
+                    swap(ptr->title, ptr->next->title);
+                    swap(ptr->author, ptr->next->author);
+                    swap(ptr->status, ptr->next->status);
+                    swapped = true;
+                }
+                ptr = ptr->next;
+            }
+            last = ptr;
+        } while (swapped);
+    }
+};
+
+void admin(LinkedList &library);
+
+int main()
+{
+    system("cls");
+    LinkedList library;
+    int choice = 0;
+
+    while (true)
+    {
+        admin(library);
+        cin >> choice;
+        system("cls");
+
+        switch (choice)
+        {
+        case 1:
+        {
+            cout << "\t\t\t\t\t\tAdd New Book" << endl;
+            int id;
+            string title, author;
+            cout << "Enter Book ID: ";
+            cin >> id;
+            cin.ignore();
+            cout << "Enter Title: ";
+            getline(cin, title);
+            cout << "Enter Author: ";
+            getline(cin, author);
+            library.append(id, title, author, "Available");
+            cout << "Book added successfully." << endl;
+            break;
+        }
+        case 2:
+        {
+            cout << "\t\t\t\t\t\tSearch For a Book" << endl;
+            cout << "1. Search by ID" << endl;
+            cout << "2. Search by Title" << endl;
+            int searchChoice;
+            cin >> searchChoice;
+            cin.ignore();
+
+            if (searchChoice == 1)
+            {
+                int id;
+                cout << "Enter Book ID to search: ";
+                cin >> id;
+                Node *found = library.searchById(id);
+                if (found)
+                {
+                    cout << "Book found:" << endl;
+                    cout << "ID: " << found->uniqueId << ", Title: " << found->title << ", Author: " << found->author << ", Status: " << found->status << endl;
+                }
+                else
+                {
+                    cout << "Book with ID " << id << " not found." << endl;
+                }
+            }
+            else if (searchChoice == 2)
+            {
+                string title;
+                cout << "Enter Book Title to search: ";
+                getline(cin, title);
+                Node *found = library.searchByTitle(title);
+                if (found)
+                {
+                    cout << "Book found:" << endl;
+                    cout << "ID: " << found->uniqueId << ", Title: " << found->title << ", Author: " << found->author << ", Status: " << found->status << endl;
+                }
+                else
+                {
+                    cout << "Book with Title \"" << title << "\" not found." << endl;
+                }
+            }
+            else
+            {
+                cout << "Invalid choice. Returning to menu." << endl;
+            }
+            break;
+        }
+        case 3:
+        {
+            cout << "\t\t\t\t\t\tIssue a Book" << endl;
+            int id;
+            cout << "Enter Book ID to issue: ";
+            cin >> id;
+            library.issueBook(id);
+            break;
+        }
+        case 4:
+        {
+            cout << "\t\t\t\t\t\tReturn a Book" << endl;
+            int id;
+            cout << "Enter Book ID to return: ";
+            cin >> id;
+            library.returnBook(id);
+            break;
+        }
+        case 5:
+        {
+            cout << "\t\t\t\t\t\tList All Books" << endl;
+            library.display();
+            break;
+        }
+        case 6:
+        {
+            cout << "\t\t\t\t\t\tDelete a Book" << endl;
+            int id;
+            cout << "Enter Book ID to delete: ";
+            cin >> id;
+            library.deleteById(id);
+            break;
+        }
+        case 7:
+        {
+            cout << "\t\t\t\t\t\tSort Books by ID" << endl;
+            library.sortByBookId();
+            cout << "Books sorted by ID." << endl;
+            break;
+        }
+        default:
+            cout << "Please enter a valid option." << endl;
+            break;
+        }
+
+        cout << "\nPress any key to continue...";
+        getch();
+        system("cls");
+    }
+
+    return 0;
+}
+
+void admin(LinkedList &library)
+{
+    cout << "\t\t\t\t\t\tLibrary Management" << endl;
+    cout << "1. Add New Book" << endl;
+    cout << "2. Search For Book" << endl;
+    cout << "3. Issue a Book" << endl;
+    cout << "4. Return a Book" << endl;
+    cout << "5. List All Books" << endl;
+    cout << "6. Delete a Book" << endl;
+    cout << "7. Sort Books by ID" << endl;
+    cout << "Choose Option: ";
+}
